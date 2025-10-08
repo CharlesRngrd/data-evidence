@@ -1,1 +1,1 @@
-select * from election_2024_mart;
+select * from election_mart;
