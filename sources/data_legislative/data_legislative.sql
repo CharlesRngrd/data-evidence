@@ -1,0 +1,1 @@
+select * from election_2024_mart;
