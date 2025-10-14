@@ -5,7 +5,10 @@ hide_toc: true
 hide_beadcrumbs: true
 ---
 
-![Drapeau Français](https://raw.githubusercontent.com/CharlesRngrd/data-evidence/refs/heads/master/french-flag.png)
+<Image
+    url="https://raw.githubusercontent.com/CharlesRngrd/data-evidence/refs/heads/master/assets/french-flag.png"
+    description="Drapeau Français"
+/>
 
 ## Préambule
 
@@ -22,7 +25,7 @@ hide_beadcrumbs: true
     Certains records nous entrainent dans l'instabilité comme les <b>5 premiers ministres</b> dans un seul mandat.
     D'autres records en découlent comme les <b>130 ministres nommés</b> depuis 2022.
     D'autres encore, ont été battus à plusieurs reprises. C'est le cas du premier ministre le plus éphémère.
-    Michel Barnier se pensait indétrônables avec ses maigres <b>91 jours</b>.
+    Michel Barnier semblait indétrônables avec ses maigres <b>91 jours</b>.
     Finalement dans un élan matinal, Sébastien Lecornu a su repousser cette limite avec seulement <b>28 jours</b> en poste.
     <br>
     <br>
@@ -113,28 +116,35 @@ hide_beadcrumbs: true
 
 ## Répartition géographique
 
-<Dropdown
-    name=selected_candidat_parti
-    title="Choisissez des partis"
-    data={liste_candidat_parti}
-    value=candidat_parti
-    multiple=true
-    selectAllByDefault=true
-/>
-
-<AreaMap
-    data={liste_candidat_rang_1}
-    areaCol=circonscription_code
-    geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
-    geoId=codeCirconscription
-    value=candidat_parti
-    height=700
-    borderWidth=0.5
-    borderColor=#fff
-    opacity=1
-    selectedColor=warning
-    basemap={"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"}
-/>
+<Grid cols=2>
+    {#each [
+        [liste_candidat_nfp, "#FC0103"],
+        [liste_candidat_ens, "#FCCC34"],
+        [liste_candidat_lr, "#2D47D9"],
+        [liste_candidat_rn, "#030553"]
+    ] as parti}
+        <AreaMap
+            data={parti[0]}
+            areaCol=circonscription_code
+            geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
+            geoId=codeCirconscription
+            value=candidat_parti
+            height=400
+            borderWidth=0.5
+            borderColor=#fff
+            opacity=1
+            selectedColor=warning
+            colorPalette={[parti[1]]}
+            basemap={"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"}
+            tooltip={[
+                {id: 'departement_nom', title: 'Département', showColumnName: true},
+                {id: 'circonscription_nom', title: 'Circonscription', showColumnName: true},
+                {id: 'candidat_denomination', title: 'Candidat', showColumnName: true},
+                {id: 'candidat_voix_pourcentage', fmt: '#,##0 "%"', title: 'Voix', showColumnName: true},
+            ]}
+        />
+    {/each}
+</Grid>
 
 <Slider
     title="Gain de points" 
@@ -160,7 +170,45 @@ hide_beadcrumbs: true
     opacity=1
     selectedColor=warning
     basemap={"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"}
+    tooltip={[
+        {id: 'departement_nom', title: 'Département', showColumnName: true},
+        {id: 'circonscription_nom', title: 'Circonscription', showColumnName: true},
+        {id: 'candidat_denomination', title: 'Candidat', showColumnName: true},
+        {id: 'candidat_voix_pourcentage', fmt: '#,##0 "%"', title: 'Voix du candidat RN', showColumnName: true},
+        {id: 'victoire_voix_poucentage', fmt: '#,##0 "%"', title: 'Voix du candidat élu', showColumnName: true}
+    ]}
 />
+
+```sql liste_candidat_rang_1
+    select *
+    from data_legislative.data_legislative
+    where candidat_rang = 1
+    and annee = ${inputs.selected_annee}
+```
+
+```sql liste_candidat_rn
+    select *
+    from ${liste_candidat_rang_1}
+    where candidat_parti = 'Rassemblement National'
+```
+
+```sql liste_candidat_lr
+    select *
+    from ${liste_candidat_rang_1}
+    where candidat_parti = 'Les Républicains'
+```
+
+```sql liste_candidat_ens
+    select *
+    from ${liste_candidat_rang_1}
+    where candidat_parti = 'Ensemble'
+```
+
+```sql liste_candidat_nfp
+    select *
+    from ${liste_candidat_rang_1}
+    where candidat_parti = 'Nouveau Front Populaire'
+```
 
 ```sql classement_candidat_parti
     select
@@ -179,27 +227,19 @@ hide_beadcrumbs: true
     END ASC
 ```
 
-```sql liste_candidat_rang_1
-    select
-        *
-    from data_legislative.data_legislative
-    where candidat_rang = 1
-    and candidat_parti in ${inputs.selected_candidat_parti.value}
-    and annee = ${inputs.selected_annee}
-```
-
 ```sql simulation_candidat_rn
     select
         *,
         if(
             candidat_rang = 1, 'Victoire 2024', 'Victoire potentielle'
-        ) as victoire_category
+        ) as victoire_category,
+        candidat_voix_pourcentage - candidat_rang_1_ecart as victoire_voix_poucentage
     from data_legislative.data_legislative
     where candidat_parti = 'Rassemblement National'
     and annee = 2024
     and (
         candidat_rang = 1
-        or candidat_rang_1_ecart >= ${inputs.gain_point_vote} * -1
+        or candidat_rang_1_ecart >= ${inputs.gain_point_vote} * -1.5
         or candidat_voix_pourcentage + ${inputs.gain_point_vote} >= 50
     )
 ```
@@ -208,12 +248,4 @@ hide_beadcrumbs: true
     select
         count() as total
     from ${simulation_candidat_rn}
-```
-
-```sql liste_candidat_parti
-    select
-        distinct candidat_parti
-    from data_legislative.data_legislative
-    where candidat_rang = 1
-    order by candidat_parti
 ```
