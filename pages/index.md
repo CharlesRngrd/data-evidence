@@ -1,63 +1,66 @@
 ---
-title: Que se passe-t'il en France ?
+title: Que se passe-t-il en France ?
+sidebar: never
+hide_toc: true
+hide_beadcrumbs: true
 ---
-
-```sql classement_candidat_parti
-    select
-        candidat_parti, count() as siege_nombre
-    from data_legislative.data_legislative
-    where candidat_rang = 1
-    and annee = ${inputs.selected_annee}
-    group by candidat_parti
-```
-
-```sql liste_candidat_rang_1
-    select
-        *
-    from data_legislative.data_legislative
-    where candidat_rang = 1
-    and candidat_parti in ${inputs.selected_candidat_parti.value}
-    and annee = ${inputs.selected_annee}
-```
-
-```sql simulation_candidat_rn
-    select
-        *,
-        if(
-            candidat_rang = 1, 'Victoire 2024', 'Victoire potentielle'
-        ) as victoire_category
-    from data_legislative.data_legislative
-    where candidat_parti = 'Rassemblement National'
-    and annee = 2024
-    and (
-        candidat_rang = 1
-        or candidat_rang_1_ecart >= ${inputs.gain_point_vote} * -1
-        or candidat_voix_pourcentage + ${inputs.gain_point_vote} >= 50
-    )
-```
-
-```sql simulation_candidat_rn_total
-    select
-        count() as total
-    from ${simulation_candidat_rn}
-```
-
-```sql liste_candidat_parti
-    select
-        distinct candidat_parti
-    from data_legislative.data_legislative
-    where candidat_rang = 1
-    order by candidat_parti
-```
 
 ![Drapeau Français](https://raw.githubusercontent.com/CharlesRngrd/data-evidence/refs/heads/master/french-flag.png)
 
+## Préambule
+
+<div style="text-align: justify">
+    <br>
+    Que se passe-t-il en France ? Cette question est sur toutes les lèvres par les temps qui courent.
+    Depuis la réélection d'Emmanuel Macron en 2022, l'histoire de la Ve république nous plonge dans un récit inédit.
+    <br>
+    <br>
+    Qui dit inédit, dit aussi records.
+    C'est là que le second mandat de notre président nous propose un spectacle époustouflant.
+    <br>
+    <br>
+    Certains records nous entrainent dans l'instabilité comme les <b>5 premiers ministres</b> dans un seul mandat.
+    D'autres records en découlent comme les <b>130 ministres nommés</b> depuis 2022.
+    D'autres encore, ont été battus à plusieurs reprises. C'est le cas du premier ministre le plus éphémère.
+    Michel Barnier se pensait indétrônables avec ses maigres <b>91 jours</b>.
+    Finalement dans un élan matinal, Sébastien Lecornu a su repousser cette limite avec seulement <b>28 jours</b> en poste.
+    <br>
+    <br>
+    A défaut d'avoir pu retenter sa chance, Michel Barnier peut malgré tout se conforter avec un autre record.
+    Celui du premier ministre le plus vieux avec ses <b>73 ans</b> lors de sa nomination.
+    Ne pouvant rivaliser sur ce terrain, Gabriel Attal détient le record inverse.
+    Celui du premier ministre le plus jeune avec seulement <b>34 ans</b>.
+    <br>
+    <br>
+    Finalement, il y a un record qui nous inquiète tous.
+    Il s'agit des <b>3400 milliards</b> de dette qui ne cesse de monter comme un courtisan à l'escalier du pouvoir.
+    <br>
+    <br>
+    Bref, quand je regarde ces chiffres, je me dis que la politique est une affaire de data.
+    <br>
+    <br>
+</div>
+
+## Composition du parlement
+
+<div style="text-align: justify">
+    <br>
+    Pour démarrarer, petit rappel sur la composition de l'assemblée nationale.<br>
+    Comme vous pouvez le vérifier le camps présendentiel a perdu des députés suite à la dissolution de 2024.
+    <br>
+    <br>
+    Cela oblige le gouvernement à faire des compromis pour avancer.
+    <br>
+    <br>
+</div>
+
+<ButtonGroup name=selected_annee>
+    <ButtonGroupItem valueLabel="Législatives 2024" value=2024 default />
+    <ButtonGroupItem valueLabel="Législatives 2022" value=2022 />
+</ButtonGroup>
+
 <ECharts
     config={{
-        title: {
-            text: 'Composition du parlement',
-            left: 'left',
-        },
         tooltip: {
             trigger: 'item',
             formatter: '{b}: {c} députés ({d}%)'
@@ -65,7 +68,7 @@ title: Que se passe-t'il en France ?
         series: [
             {
                 type: 'pie',
-                radius: ['100%', '160%'],
+                radius: ['120%', '180%'],
                 center: ['50%', '100%'],
                 startAngle: 180,
                 endAngle: 360,
@@ -83,12 +86,32 @@ title: Que se passe-t'il en France ?
                 itemStyle: {
                     borderRadius: 6,
                     borderColor: '#fff',
-                    borderWidth: 2
+                    borderWidth: 2,
+                    color: function(params) {
+                        const colors = {
+                            "Rassemblement National": "#030553",
+                            "Les Républicains": "#2D47D9",
+                            "Ensemble": "#FCCC34",
+                            "Nouveau Front Populaire": "#FC0103",
+                        };
+                        return colors[params.name] || "#95a5a6";
+                    }
                 }
             }
         ]
     }}
 />
+
+<Details title="D'où vient la data ?">
+    Le data vient de <u><a href="https://www.data.gouv.fr/datasets/elections-legislatives-des-30-juin-et-7-juillet-2024-resultats-definitifs-du-2nd-tour">data.gouv.fr</a></u>
+    <br>
+    <br>
+    Points de vigilance :
+    <br>- Pour des raisons de clareté, les partis ont été regroupés en 4 grandes forces politiques.
+    <br>- Les données du second tour ne contiennent pas les résultats des circonsriptions remportées dès le permier tour.
+</Details>
+
+## Répartition géographique
 
 <Dropdown
     name=selected_candidat_parti
@@ -98,11 +121,6 @@ title: Que se passe-t'il en France ?
     multiple=true
     selectAllByDefault=true
 />
-
-<ButtonGroup name=selected_annee>
-    <ButtonGroupItem valueLabel="Législatives 2024" value=2024 default />
-    <ButtonGroupItem valueLabel="Législatives 2022" value=2022 />
-</ButtonGroup>
 
 <AreaMap
     data={liste_candidat_rang_1}
@@ -143,3 +161,59 @@ title: Que se passe-t'il en France ?
     selectedColor=warning
     basemap={"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"}
 />
+
+```sql classement_candidat_parti
+    select
+        candidat_parti, count() as siege_nombre
+    from data_legislative.data_legislative
+    where candidat_rang = 1
+    and annee = ${inputs.selected_annee}
+    group by candidat_parti
+    order by
+    CASE
+        WHEN candidat_parti = 'Nouveau Front Populaire' THEN 1
+        WHEN candidat_parti = 'Ensemble' THEN 2
+        WHEN candidat_parti = 'Les Républicains' THEN 3
+        WHEN candidat_parti = 'Rassemblement National' THEN 4
+        ELSE 10
+    END ASC
+```
+
+```sql liste_candidat_rang_1
+    select
+        *
+    from data_legislative.data_legislative
+    where candidat_rang = 1
+    and candidat_parti in ${inputs.selected_candidat_parti.value}
+    and annee = ${inputs.selected_annee}
+```
+
+```sql simulation_candidat_rn
+    select
+        *,
+        if(
+            candidat_rang = 1, 'Victoire 2024', 'Victoire potentielle'
+        ) as victoire_category
+    from data_legislative.data_legislative
+    where candidat_parti = 'Rassemblement National'
+    and annee = 2024
+    and (
+        candidat_rang = 1
+        or candidat_rang_1_ecart >= ${inputs.gain_point_vote} * -1
+        or candidat_voix_pourcentage + ${inputs.gain_point_vote} >= 50
+    )
+```
+
+```sql simulation_candidat_rn_total
+    select
+        count() as total
+    from ${simulation_candidat_rn}
+```
+
+```sql liste_candidat_parti
+    select
+        distinct candidat_parti
+    from data_legislative.data_legislative
+    where candidat_rang = 1
+    order by candidat_parti
+```
