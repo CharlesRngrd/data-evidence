@@ -44,7 +44,7 @@ hide_beadcrumbs: true
     <br>
 </div>
 
-## Composition du parlement
+## Composition du parlement en <Value data={simulation_candidat_total} column=annee fmt="###0" />
 
 <div style="text-align: justify">
     <br>
@@ -114,7 +114,7 @@ hide_beadcrumbs: true
     <br>- Les données du second tour ne contiennent pas les résultats des circonsriptions remportées dès le permier tour.
 </Details>
 
-## Répartition géographique
+## Répartition géographique en <Value data={simulation_candidat_total} column=annee fmt="###0" />
 
 <Grid cols=2>
     {#each [
@@ -146,20 +146,28 @@ hide_beadcrumbs: true
     {/each}
 </Grid>
 
-<Slider
-    title="Gain de points" 
-    name=gain_point_vote
-    min=0
-    max=10
-/>
+## Simulation d'une augmentation des voix en <Value data={simulation_candidat_total} column=annee fmt="###0" />
 
-<BigValue 
-  data={simulation_candidat_rn_total} 
-  value=total
-/>
+<Grid cols=2>
+    <ButtonGroup name=selected_candidat_parti>
+        <ButtonGroupItem valueLabel="Nouveau Front Populaire" value="Nouveau Front Populaire" default />
+        <ButtonGroupItem valueLabel="Rassemblement National" value="Rassemblement National" />
+    </ButtonGroup>
+
+    <Slider
+        title="Gain de points"
+        name=gain_point_vote
+        min=1
+        max=10
+    />
+</Grid>
+
+Si le **{inputs.selected_candidat_parti}** augmente son score de **{inputs.gain_point_vote} points**,
+le parti aura **<Value data={simulation_candidat_total} column=total /> députés**
+soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par rapport à <Value data={simulation_candidat_total} column=annee fmt="###0" />.
 
 <AreaMap
-    data={simulation_candidat_rn}
+    data={simulation_candidat}
     areaCol=circonscription_code
     geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
     geoId=codeCirconscription
@@ -169,13 +177,16 @@ hide_beadcrumbs: true
     borderColor=#fff
     opacity=1
     selectedColor=warning
+    colorPalette={
+        inputs.selected_candidat_parti=="Nouveau Front Populaire" ? ["#FC0103", "#FE8A8A"] : ["#030553", "#BABBFD"]
+    }
     basemap={"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"}
     tooltip={[
         {id: 'departement_nom', title: 'Département', showColumnName: true},
         {id: 'circonscription_nom', title: 'Circonscription', showColumnName: true},
         {id: 'candidat_denomination', title: 'Candidat', showColumnName: true},
         {id: 'candidat_voix_pourcentage', fmt: '#,##0 "%"', title: 'Voix du candidat RN', showColumnName: true},
-        {id: 'victoire_voix_poucentage', fmt: '#,##0 "%"', title: 'Voix du candidat élu', showColumnName: true}
+        {id: 'candidat_rang_1_score', fmt: '#,##0 "%"', title: 'Voix du candidat élu', showColumnName: true}
     ]}
 />
 
@@ -227,16 +238,15 @@ hide_beadcrumbs: true
     END ASC
 ```
 
-```sql simulation_candidat_rn
+```sql simulation_candidat
     select
         *,
         if(
             candidat_rang = 1, 'Victoire 2024', 'Victoire potentielle'
-        ) as victoire_category,
-        candidat_voix_pourcentage - candidat_rang_1_ecart as victoire_voix_poucentage
+        ) as victoire_category
     from data_legislative.data_legislative
-    where candidat_parti = 'Rassemblement National'
-    and annee = 2024
+    where candidat_parti = '${inputs.selected_candidat_parti}'
+    and annee = ${inputs.selected_annee}
     and (
         candidat_rang = 1
         or candidat_rang_1_ecart >= ${inputs.gain_point_vote} * -1.5
@@ -244,8 +254,8 @@ hide_beadcrumbs: true
     )
 ```
 
-```sql simulation_candidat_rn_total
+```sql simulation_candidat_total
     select
-        count() as total
-    from ${simulation_candidat_rn}
+        max(annee) as annee, count() as total, count_if(candidat_rang != 1) as ecart
+    from ${simulation_candidat}
 ```
