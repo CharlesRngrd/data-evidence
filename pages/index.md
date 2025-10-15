@@ -5,12 +5,14 @@ hide_toc: true
 hide_beadcrumbs: true
 ---
 
+<Note>
+    Publié par Charles RANGHEARD le 15 octobre 2025.
+</Note>
+
 <Image
     url="https://raw.githubusercontent.com/CharlesRngrd/data-evidence/refs/heads/master/assets/french-flag.png"
     description="Drapeau Français"
 />
-
-## Préambule
 
 <div style="text-align: justify">
     <br>
@@ -19,13 +21,13 @@ hide_beadcrumbs: true
     <br>
     <br>
     Qui dit inédit, dit aussi records.
-    C'est là que le second mandat de notre président nous propose un spectacle époustouflant.
+    C'est là que le second mandat de notre président nous offre son spectacle.
     <br>
     <br>
     Certains records nous entrainent dans l'instabilité comme les <b>5 premiers ministres</b> dans un seul mandat.
     D'autres records en découlent comme les <b>130 ministres nommés</b> depuis 2022.
     D'autres encore, ont été battus à plusieurs reprises. C'est le cas du premier ministre le plus éphémère.
-    Michel Barnier semblait indétrônables avec ses maigres <b>91 jours</b>.
+    Michel Barnier semblait indétrônable avec ses maigres <b>91 jours</b>.
     Finalement dans un élan matinal, Sébastien Lecornu a su repousser cette limite avec seulement <b>28 jours</b> en poste.
     <br>
     <br>
@@ -40,6 +42,7 @@ hide_beadcrumbs: true
     <br>
     <br>
     Bref, quand je regarde ces chiffres, je me dis que la politique est une affaire de data.
+    C'est ce que nous allons explorer au travers des résultats des élections législatives 2022 et 2024.
     <br>
     <br>
 </div>
@@ -49,7 +52,7 @@ hide_beadcrumbs: true
 <div style="text-align: justify">
     <br>
     Pour démarrarer, petit rappel sur la composition de l'assemblée nationale.<br>
-    Comme vous pouvez le vérifier le camps présendentiel a perdu des députés suite à la dissolution de 2024.
+    Comme vous le savez, le camp présendentiel a perdu des députés suite à la dissolution de 2024.
     <br>
     <br>
     Cela oblige le gouvernement à faire des compromis pour avancer.
@@ -112,9 +115,27 @@ hide_beadcrumbs: true
     Points de vigilance :
     <br>- Pour des raisons de clareté, les partis ont été regroupés en 4 grandes forces politiques.
     <br>- Les données du second tour ne contiennent pas les résultats des circonsriptions remportées dès le permier tour.
+    Elles ont été rajoutées en utilisant le jeu de données du premier tour.
 </Details>
 
 ## Répartition géographique en <Value data={simulation_candidat_total} column=annee fmt="###0" />
+
+<div style="text-align: justify">
+    <br>
+    Lorsque l'on regarde par famille politique la carte de France des résultats, certaines régularités s'observent :
+    <br>- Quelque soit le parti, la majorité des circonscriptions gagnées touchent une autre circonscription gagnée par ce même parti.
+    Cela forme des tâches qui n'ont rien à voir avec les départements.
+    <br>- Chaque parti est fortement représenté dans une zone distincte de la France : le Nouveau Front Populaire est très présent dans le sud-ouest, Ensemble dans le nord-ouest, Les Républicains dans l'Est et le Rassemblement National au nord-est et au sud-est. A croire que les citoyens qui habitent sur la partie droite de la France votent à droite.
+    <br>
+    <br>
+    Attention, au premier abord, on a l'impression qu'il y a plus de députés Rassemblement National que Nouveau Front Populaire. En réalité le Nouveau Front Populaire est très présent dans les grandes villes. Vous pouvez le vérifier avec un zoom sur Paris.
+    <br>
+    <br>
+</div>
+
+<Details title="Où sont les DOM-TOM ?">
+    Oui, désolé, les DOM-TOM ne s'affichent pas sur la carte. C'est en cours de correction.
+</Details>
 
 <Grid cols=2>
     {#each [
@@ -128,7 +149,7 @@ hide_beadcrumbs: true
             areaCol=circonscription_code
             geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
             geoId=codeCirconscription
-            value=candidat_parti
+            value="Parti politique"
             height=400
             borderWidth=0.5
             borderColor=#fff
@@ -148,6 +169,18 @@ hide_beadcrumbs: true
 
 ## Simulation d'une augmentation des voix en <Value data={simulation_candidat_total} column=annee fmt="###0" />
 
+<div style="text-align: justify">
+    <br>
+    Reste une grande question : Est-ce que le Nouveau Front Populaire ou le Rassemblement National pourrait obtenir une majorité ?
+    Vous pouvez simuler le nombre de députés qu'ils pourraient obtenir si leur score grimperait pour les prochaines législatives.
+    <br>
+    <br>
+</div>
+
+Si le **{inputs.selected_candidat_parti}** augmente son score de **{inputs.gain_point_vote} point{inputs.gain_point_vote == 1 ? "" : "s"}**,
+le parti aura **<Value data={simulation_candidat_total} column=total /> députés**.
+Soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par rapport à <Value data={simulation_candidat_total} column=annee fmt="###0" />.
+
 <Grid cols=2>
     <ButtonGroup name=selected_candidat_parti>
         <ButtonGroupItem valueLabel="Nouveau Front Populaire" value="Nouveau Front Populaire" default />
@@ -162,16 +195,12 @@ hide_beadcrumbs: true
     />
 </Grid>
 
-Si le **{inputs.selected_candidat_parti}** augmente son score de **{inputs.gain_point_vote} points**,
-le parti aura **<Value data={simulation_candidat_total} column=total /> députés**
-soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par rapport à <Value data={simulation_candidat_total} column=annee fmt="###0" />.
-
 <AreaMap
     data={simulation_candidat}
     areaCol=circonscription_code
     geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
     geoId=codeCirconscription
-    value=victoire_category
+    value="Catégorie d'élus"
     height=700
     borderWidth=0.5
     borderColor=#fff
@@ -191,7 +220,7 @@ soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par 
 />
 
 ```sql liste_candidat_rang_1
-    select *
+    select *, candidat_parti AS "Parti politique"
     from data_legislative.data_legislative
     where candidat_rang = 1
     and annee = ${inputs.selected_annee}
@@ -242,8 +271,8 @@ soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par 
     select
         *,
         if(
-            candidat_rang = 1, 'Victoire 2024', 'Victoire potentielle'
-        ) as victoire_category
+            candidat_rang = 1, 'Elu 2024', 'Elu potentiel'
+        ) as "Catégorie d'élus"
     from data_legislative.data_legislative
     where candidat_parti = '${inputs.selected_candidat_parti}'
     and annee = ${inputs.selected_annee}
