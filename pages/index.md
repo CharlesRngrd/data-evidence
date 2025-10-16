@@ -71,11 +71,12 @@ hide_beadcrumbs: true
             trigger: 'item',
             formatter: '{b}: {c} députés ({d}%)'
         },
+        legend: { orient: 'horizontal', y: 'bottom' },
         series: [
             {
                 type: 'pie',
-                radius: ['120%', '180%'],
-                center: ['50%', '100%'],
+                radius: ['100%', '150%'],
+                center: ['50%', '80%'],
                 startAngle: 180,
                 endAngle: 360,
                 data: classement_candidat_parti.map(d => ({
@@ -83,11 +84,10 @@ hide_beadcrumbs: true
                     value: d.siege_nombre
                 })),
                 label: {
-                    show: true,
-                    position: 'outside'
+                    show: false
                 },
                 labelLine: {
-                    show: true
+                    show: false
                 },
                 itemStyle: {
                     borderRadius: 6,
@@ -104,7 +104,16 @@ hide_beadcrumbs: true
                     }
                 }
             }
-        ]
+        ],
+        media: [{
+            query: { maxWidth: 600 },
+            option: {
+                series: [{
+                    radius: ['60%', '95%'],
+                    center: ['50%', '60%']
+                }]
+            }
+        }]
     }}
 />
 
@@ -150,7 +159,6 @@ hide_beadcrumbs: true
             geoJsonUrl='https://raw.githubusercontent.com/CharlesRngrd/data_demo/refs/heads/main/assets/map.geojson'
             geoId=codeCirconscription
             value="Parti politique"
-            height=400
             borderWidth=0.5
             borderColor=#fff
             opacity=1
