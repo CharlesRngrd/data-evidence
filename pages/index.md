@@ -171,15 +171,22 @@ hide_beadcrumbs: true
 
 <div style="text-align: justify">
     <br>
-    Reste une grande question : Est-ce que le Nouveau Front Populaire ou le Rassemblement National pourrait obtenir une majorité ?
-    Vous pouvez simuler le nombre de députés qu'ils pourraient obtenir si leur score grimperait pour les prochaines législatives.
+    Une question reste en suspens :
+    <br>Que se passerait-il en cas de nouvelle disolution ?
+    Est-ce que le Nouveau Front Populaire ou le Rassemblement National pourrait obtenir une majorité ?
+    <br>Vous pouvez simuler le nombre de députés qu'ils pourraient obtenir si leur score grimpait lors des prochaines législatives.
     <br>
     <br>
 </div>
 
 Si le **{inputs.selected_candidat_parti}** augmente son score de **{inputs.gain_point_vote} point{inputs.gain_point_vote == 1 ? "" : "s"}**,
 le parti aura **<Value data={simulation_candidat_total} column=total /> députés**.
-Soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par rapport à <Value data={simulation_candidat_total} column=annee fmt="###0" />.
+Soit **+<Value data={simulation_candidat_total} column=ecart /> députés** par rapport à <Value data={simulation_candidat_total} column=annee fmt="###0." />
+
+<Details title="Comment sont fait les calculs ?">
+    En cas de duel, 1 point permet de gommer un écart de 2 points car l'adversaire perdrait 1 point également.
+    <br>En cas de triangulaire, 1 point permet de gommer un écart de 1,5 points car les 2 adversaires perdraient 0,5 point.
+</Details>
 
 <Grid cols=2>
     <ButtonGroup name=selected_candidat_parti>
